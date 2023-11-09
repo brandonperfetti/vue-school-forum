@@ -8,6 +8,13 @@ const routes = [
     component: HomeView,
   },
   {
+    path: "/category/:id",
+    name: "Category",
+    props: true,
+    component: () =>
+      import(/* webpackChunkName: "forum" */ "../views/CategoryView.vue"),
+  },
+  {
     path: "/forum/:id",
     name: "Forum",
     props: true,
