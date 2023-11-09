@@ -1,51 +1,68 @@
 <template>
-  <!-- <div v-for="thread in threads" :key="thread.id" class="col-large push-top">
-    <h1>{{ thread.title }}</h1>
-    <div class="post-list">
-      <div class="post" v-for="postId in thread.posts" :key="postId">
-        <div class="user-info">
-          <a href="#" class="user-name">
-            {{ userById(postById(postId).userId).name }}
-          </a>
-          <a href="#">
-            <img
-              :src="userById(postById(postId).userId).avatar"
-              alt=""
-              class="avatar-large"
-            />
-          </a>
-          <p class="desktop-only text-small">107 posts</p>
-        </div>
-        <div class="post-content">
-          <div>
-            <p>
-              {{ postById(postId).text }}
-            </p>
-          </div>
-        </div>
-        <div class="post-date text-faded">
-          {{ postById(postId).publishedAt }}
+  <div class="post-list">
+    <div class="post" v-for="post in posts" :key="post.id">
+      <div class="user-info">
+        <a href="#" class="user-name">
+          {{ userById(post.userId).name }}
+        </a>
+        <a href="#">
+          <img
+            :src="userById(post.userId).avatar"
+            alt=""
+            class="avatar-large"
+          />
+        </a>
+        <p class="desktop-only text-small">107 posts</p>
+      </div>
+      <div class="post-content">
+        <div>
+          <p>
+            {{ post.text }}
+          </p>
         </div>
       </div>
+      <div
+        class="post-date text-faded"
+        :title="humanFriendlydate(post.publishedAt)"
+      >
+        {{ diffForHumans(post.publishedAt) }}
+      </div>
     </div>
-  </div> -->
-  <h1>Welcome to the Forum</h1>
-  <ThreadList :threads="threads" />
+  </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import ThreadList from "@/components/ThreadList.vue";
 import sourceData from "@/data.json";
+import dayjs from "dayjs";
+import localizedDate from "dayjs/plugin/localizedFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedDate);
 
 export default {
-  components: {
-    ThreadList,
+  props: {
+    posts: {
+      type: Array,
+      required: true,
+    },
   },
   data() {
     return {
-      threads: sourceData.threads,
+      users: sourceData.users,
     };
+  },
+  methods: {
+    userById(userId) {
+      return this.users.find((u) => u.id === userId);
+    },
+    diffForHumans(timestamp) {
+      return dayjs.unix(timestamp).fromNow();
+    },
+    humanFriendlydate(timestamp) {
+      return dayjs.unix(timestamp).format("llll");
+    },
   },
 };
 </script>
