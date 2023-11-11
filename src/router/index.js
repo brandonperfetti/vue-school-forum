@@ -1,4 +1,5 @@
 import sourceData from "@/data.json";
+import { findById } from "@/helpers/index.js";
 import HomeView from "@/views/HomeView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
@@ -44,9 +45,8 @@ const routes = [
       import(/* webpackChunkName: "thread" */ "../views/ThreadShowView.vue"),
     beforeEnter(to, from, next) {
       // check if thread exists
-      const threadExists = sourceData.threads.find(
-        (thread) => thread.id === to.params.id
-      );
+      const threadExists = findById(sourceData.threads, to.params.id);
+
       // if exists continue
       if (threadExists) {
         return next();
@@ -61,6 +61,20 @@ const routes = [
       }
       // if doesnt exist redirect to not found
     },
+  },
+  {
+    path: "/forum/:forumId/thread/create",
+    name: "ThreadCreate",
+    props: true,
+    component: () =>
+      import(/* webpackChunkName: "thread" */ "../views/ThreadCreateView.vue"),
+  },
+  {
+    path: "/thread/:id/edit",
+    name: "ThreadEdit",
+    props: true,
+    component: () =>
+      import(/* webpackChunkName: "thread" */ "../views/ThreadEditView.vue"),
   },
   {
     path: "/:pathMatch(.*)*", // catch all 404

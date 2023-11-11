@@ -1,6 +1,20 @@
 <template>
   <div class="col-large push-top">
-    <h1>{{ thread.title }}</h1>
+    <h1>
+      {{ thread.title }}
+      <router-link
+        :to="{
+          name: 'ThreadEdit',
+          params: { id },
+        }"
+        custom
+        v-slot="{ navigate }"
+      >
+        <button @click="navigate" class="btn-green btn-small">
+          Edit Thread
+        </button>
+      </router-link>
+    </h1>
     <post-list :posts="threadPosts" />
     <post-editor @save="addPost" />
   </div>
@@ -10,6 +24,8 @@
 // @ is an alias to /src
 import PostEditor from "@/components/PostEditor.vue";
 import PostList from "@/components/PostList.vue";
+import { findById } from "@/helpers/index.js";
+
 export default {
   components: {
     PostList,
@@ -30,7 +46,7 @@ export default {
       return this.$store.state.posts;
     },
     thread() {
-      return this.threads.find((thread) => thread.id === this.id); // also available under this.$route.params.id
+      return findById(this.threads, this.id);
     },
     threadPosts() {
       return this.posts.filter((post) => post.threadId === this.id);

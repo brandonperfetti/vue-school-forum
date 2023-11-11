@@ -1,4 +1,5 @@
 import sourceData from "@/data.json";
+import { findById, upsert } from "@/helpers/index.js";
 import { createStore } from "vuex";
 
 export default createStore({
@@ -8,7 +9,7 @@ export default createStore({
   },
   getters: {
     authUser: (state) => {
-      const user = state.users.find((user) => user.id === state.authId);
+      const user = findById(state.users, state.authId);
       if (!user) return null;
       return {
         ...user,
@@ -33,15 +34,29 @@ export default createStore({
   },
   mutations: {
     setPost(state, { post }) {
-      state.posts.push(post);
+      upsert(state.posts, post);
+    },
+    setThread(state, { thread }) {
+      upsert(state.threads, thread);
     },
     setUser(state, { user, userId }) {
       const userIndex = state.users.findIndex((user) => user.id === userId);
       state.users[userIndex] = user;
     },
     apendPostToThread(state, { postId, threadId }) {
-      const thread = state.threads.find((thread) => thread.id === threadId);
+      const thread = findById(state.threads, threadId);
+      thread.posts = thread.posts || [];
       thread.posts.push(postId);
+    },
+    appendThreadToForum(state, { forumId, threadId }) {
+      const forum = findById(state.forums, forumId);
+      forum.threads = forum.threads || [];
+      forum.threads.push(threadId);
+    },
+    appendThreadToUser(state, { userId, threadId }) {
+      const user = findById(state.users, userId);
+      user.threads = user.threads || [];
+      user.threads.push(threadId);
     },
   },
   actions: {
@@ -54,6 +69,26 @@ export default createStore({
         postId: post.id,
         threadId: post.threadId,
       }); // append post to thread
+    },
+    async createThread({ commit, state, dispatch }, { text, title, forumId }) {
+      const id = "gggg" + Math.random();
+      const userId = state.authId;
+      const publishedAt = Math.floor(Date.now() / 1000);
+      const thread = { forumId, title, publishedAt, userId, id };
+      commit("setThread", { thread }); // set the thread
+      commit("appendThreadToUser", { userId, threadId: id }); // append thread to user
+      commit("appendThreadToForum", { forumId, threadId: id }); // append thread to forum
+      dispatch("createPost", { text, threadId: id }); // create the post
+      return findById(state.threads, id);
+    },
+    async updateThread({ commit, state }, { title, text, id }) {
+      const thread = findById(state.threads, id);
+      const post = findById(state.posts, thread.posts[0]);
+      const newThread = { ...thread, title };
+      const newPost = { ...post, text };
+      commit("setThread", { thread: newThread });
+      commit("setPost", { post: newPost });
+      return newThread;
     },
     updateUser({ commit }, user) {
       commit("setUser", { user, userId: user.id });

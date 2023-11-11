@@ -2,7 +2,10 @@
   <h1>{{ category.name }}</h1>
   <ForumList :title="category.name" :forums="getForumsForCategory(category)" />
 </template>
+
 <script>
+import { findById } from "@/helpers/index.js";
+
 import ForumList from "@/components/ForumList.vue";
 export default {
   components: {
@@ -16,9 +19,7 @@ export default {
   },
   computed: {
     category() {
-      return this.$store.state.categories.find(
-        (category) => category.id === this.id
-      );
+      return findById(this.$store.state.categories, this.id);
     },
   },
   methods: {
