@@ -8,27 +8,49 @@ export default createStore({
     authId: "VXjpr2WHa8Ux4Bnggym8QFLdv5C3",
   },
   getters: {
-    authUser: (state) => {
-      const user = findById(state.users, state.authId);
-      if (!user) return null;
-      return {
-        ...user,
-        // authUser.posts
-        get posts() {
-          return state.posts.filter((post) => post.userId === user.id);
-        },
-        // authUser.postsCount
-        get postsCount() {
-          return this.posts.length;
-        },
-        // authUser.threads
-        get threads() {
-          return state.threads.filter((thread) => thread.userId === user.id);
-        },
-        // authUser.threadsCount
-        get threadsCount() {
-          return this.threads.length;
-        },
+    authUser: (state, getters) => {
+      return getters.user(state.authId);
+    },
+    user: (state) => {
+      return (id) => {
+        const user = findById(state.users, id);
+        if (!user) return null;
+        return {
+          ...user,
+          // authUser.posts
+          get posts() {
+            return state.posts.filter((post) => post.userId === user.id);
+          },
+          // authUser.postsCount
+          get postsCount() {
+            return this.posts.length;
+          },
+          // authUser.threads
+          get threads() {
+            return state.threads.filter((thread) => thread.userId === user.id);
+          },
+          // authUser.threadsCount
+          get threadsCount() {
+            return this.threads.length;
+          },
+        };
+      };
+    },
+    thread: (state) => {
+      return (id) => {
+        const thread = findById(state.threads, id);
+        return {
+          ...thread,
+          get author() {
+            return findById(state.users, thread.userId);
+          },
+          get repliesCount() {
+            return thread.posts.length - 1;
+          },
+          get contributorsCount() {
+            return thread.contributors.length;
+          },
+        };
       };
     },
   },
@@ -43,21 +65,22 @@ export default createStore({
       const userIndex = state.users.findIndex((user) => user.id === userId);
       state.users[userIndex] = user;
     },
-    apendPostToThread(state, { postId, threadId }) {
-      const thread = findById(state.threads, threadId);
-      thread.posts = thread.posts || [];
-      thread.posts.push(postId);
-    },
-    appendThreadToForum(state, { forumId, threadId }) {
-      const forum = findById(state.forums, forumId);
-      forum.threads = forum.threads || [];
-      forum.threads.push(threadId);
-    },
-    appendThreadToUser(state, { userId, threadId }) {
-      const user = findById(state.users, userId);
-      user.threads = user.threads || [];
-      user.threads.push(threadId);
-    },
+    appendPostToThread: makeAppendChildToParentMutation({
+      parent: "threads",
+      child: "posts",
+    }),
+    appendThreadToForum: makeAppendChildToParentMutation({
+      parent: "forums",
+      child: "threads",
+    }),
+    appendThreadToUser: makeAppendChildToParentMutation({
+      parent: "users",
+      child: "threads",
+    }),
+    appendContributorToThread: makeAppendChildToParentMutation({
+      parent: "threads",
+      child: "contributors",
+    }),
   },
   actions: {
     createPost({ commit, state }, post) {
@@ -65,10 +88,14 @@ export default createStore({
       post.userId = state.authId;
       post.publishedAt = Math.floor(Date.now() / 1000);
       commit("setPost", { post }); // set the post
-      commit("apendPostToThread", {
-        postId: post.id,
-        threadId: post.threadId,
+      commit("appendPostToThread", {
+        childId: post.id,
+        parentId: post.threadId,
       }); // append post to thread
+      commit("appendContributorToThread", {
+        childId: state.authId,
+        parentId: post.threadId,
+      }); // append contributor to thread
     },
     async createThread({ commit, state, dispatch }, { text, title, forumId }) {
       const id = "gggg" + Math.random();
@@ -76,8 +103,8 @@ export default createStore({
       const publishedAt = Math.floor(Date.now() / 1000);
       const thread = { forumId, title, publishedAt, userId, id };
       commit("setThread", { thread }); // set the thread
-      commit("appendThreadToUser", { userId, threadId: id }); // append thread to user
-      commit("appendThreadToForum", { forumId, threadId: id }); // append thread to forum
+      commit("appendThreadToUser", { parentId: userId, childId: id }); // append thread to user
+      commit("appendThreadToForum", { parentId: forumId, childId: id }); // append thread to forum
       dispatch("createPost", { text, threadId: id }); // create the post
       return findById(state.threads, id);
     },
@@ -96,3 +123,13 @@ export default createStore({
   },
   modules: {},
 });
+
+function makeAppendChildToParentMutation({ parent, child }) {
+  return (state, { childId, parentId }) => {
+    const resource = findById(state[parent], parentId);
+    resource[child] = resource[child] || [];
+    if (!resource[child].includes(childId)) {
+      resource[child].push(childId);
+    }
+  };
+}
