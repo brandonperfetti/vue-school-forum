@@ -1,11 +1,26 @@
 import sourceData from "@/data.json";
 import HomeView from "@/views/HomeView.vue";
 import { createRouter, createWebHistory } from "vue-router";
+
 const routes = [
   {
     path: "/",
     name: "Home",
     component: HomeView,
+  },
+  {
+    path: "/me",
+    name: "Profile",
+    meta: { toTop: true, smoothScroll: true },
+    component: () =>
+      import(/* webpackChunkName: "profile" */ "../views/ProfileView.vue"),
+  },
+  {
+    path: "/me/edit",
+    name: "ProfileEdit",
+    props: { edit: true },
+    component: () =>
+      import(/* webpackChunkName: "profile" */ "../views/ProfileView.vue"),
   },
   {
     path: "/category/:id",
@@ -67,6 +82,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+  scrollBehavior(to) {
+    const scroll = {};
+    if (to.meta.toTop) scroll.top = 0;
+    if (to.meta.smoothScroll) scroll.behavior = "smooth";
+    return scroll;
+  },
 });
 
 export default router;

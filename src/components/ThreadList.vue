@@ -39,21 +39,29 @@
     </div>
   </div>
 </template>
-<script setup>
-// @ is an alias to /src
-import sourceData from "@/data.json";
-import { reactive } from "vue";
-
-const users = reactive(sourceData.users);
-
-defineProps({
-  threads: {
-    required: true,
-    type: Array,
+<script>
+export default {
+  props: {
+    threads: {
+      type: Array,
+      required: true,
+    },
   },
-});
-
-function userById(userId) {
-  return users.find((u) => u.id === userId);
-}
+  computed: {
+    posts() {
+      return this.$store.state.posts;
+    },
+    users() {
+      return this.$store.state.users;
+    },
+  },
+  methods: {
+    postById(postId) {
+      return this.posts.find((p) => p.id === postId);
+    },
+    userById(userId) {
+      return this.users.find((p) => p.id === userId);
+    },
+  },
+};
 </script>

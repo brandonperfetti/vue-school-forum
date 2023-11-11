@@ -2144,7 +2144,6 @@ figure {
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    padding-top: 1rem;
 }
 
 @media (min-width: 240px) and (max-width: 720px) {
