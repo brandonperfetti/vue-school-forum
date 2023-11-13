@@ -4,7 +4,12 @@
     <router-link :to="{ name: 'Home' }">Go Home</router-link>
   </div>
 </template>
+
 <script>
-export default {};
+export default {
+  created() {
+    this.$emit("ready");
+  },
+};
 </script>
 <style scoped></style>

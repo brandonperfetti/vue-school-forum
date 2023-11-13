@@ -1,5 +1,4 @@
-import sourceData from "@/data.json";
-import { findById } from "@/helpers/index.js";
+import store from "@/store";
 import HomeView from "@/views/HomeView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
@@ -21,14 +20,14 @@ const routes = [
     name: "ProfileEdit",
     props: { edit: true },
     component: () =>
-      import(/* webpackChunkName: "profile" */ "../views/ProfileView.vue"),
+      import(/* webpackChunkName: "profile-edit" */ "../views/ProfileView.vue"),
   },
   {
     path: "/category/:id",
     name: "Category",
     props: true,
     component: () =>
-      import(/* webpackChunkName: "forum" */ "../views/CategoryView.vue"),
+      import(/* webpackChunkName: "category" */ "../views/CategoryView.vue"),
   },
   {
     path: "/forum/:id",
@@ -42,39 +41,39 @@ const routes = [
     name: "ThreadShow",
     props: true,
     component: () =>
-      import(/* webpackChunkName: "thread" */ "../views/ThreadShowView.vue"),
-    beforeEnter(to, from, next) {
-      // check if thread exists
-      const threadExists = findById(sourceData.threads, to.params.id);
-
-      // if exists continue
-      if (threadExists) {
-        return next();
-      } else {
-        next({
-          name: "NotFound",
-          params: { pathMatch: to.path.substring(1).split("/") },
-          // preserve existing query and hash
-          query: to.query,
-          hash: to.hash,
-        });
-      }
-      // if doesnt exist redirect to not found
-    },
+      import(
+        /* webpackChunkName: "thread-show" */ "../views/ThreadShowView.vue"
+      ),
   },
   {
     path: "/forum/:forumId/thread/create",
     name: "ThreadCreate",
     props: true,
     component: () =>
-      import(/* webpackChunkName: "thread" */ "../views/ThreadCreateView.vue"),
+      import(
+        /* webpackChunkName: "thread-create" */ "../views/ThreadCreateView.vue"
+      ),
   },
   {
     path: "/thread/:id/edit",
     name: "ThreadEdit",
     props: true,
     component: () =>
-      import(/* webpackChunkName: "thread" */ "../views/ThreadEditView.vue"),
+      import(
+        /* webpackChunkName: "thread-edit" */ "../views/ThreadEditView.vue"
+      ),
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () =>
+      import(/* webpackChunkName: "register" */ "../views/RegisterView.vue"),
+  },
+  {
+    path: "/signin",
+    name: "SignIn",
+    component: () =>
+      import(/* webpackChunkName: "signin" */ "../views/SignInView.vue"),
   },
   {
     path: "/:pathMatch(.*)*", // catch all 404
@@ -102,6 +101,10 @@ const router = createRouter({
     if (to.meta.smoothScroll) scroll.behavior = "smooth";
     return scroll;
   },
+});
+
+router.beforeEach(() => {
+  store.dispatch("unsubscribeAllSnapshots");
 });
 
 export default router;

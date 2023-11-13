@@ -1,12 +1,29 @@
 import { createApp } from "vue";
 import App from "./App.vue";
+import firebaseConfig from "./config/firebase";
 import router from "./router";
 import store from "./store";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+import FontAwesome from "@/plugins/FontAwesome";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+firebase.auth().onAuthStateChanged((user) => {
+  store.dispatch("unsubscribeAuthUserSnapshot");
+  if (user) {
+    store.dispatch("fetchAuthUser");
+  }
+});
 
 const forumApp = createApp(App);
 
 forumApp.use(store);
 forumApp.use(router);
+forumApp.use(FontAwesome);
 
 const requireComponent = require.context(
   "./components",

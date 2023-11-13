@@ -1,33 +1,50 @@
 <template>
-  <h1>{{ category.name }}</h1>
-  <ForumList :title="category.name" :forums="getForumsForCategory(category)" />
+  <div v-if="asyncDataStatus_ready" class="container col-full">
+    <h1>{{ category.name }}</h1>
+    <ForumList
+      :title="category.name"
+      :forums="getForumsForCategory(category)"
+    />
+  </div>
 </template>
 
 <script>
-import { findById } from "@/helpers/index.js";
+import ForumList from "@/components/ForumList";
+import { findById } from "@/helpers";
+import asyncDataStatus from "@/mixins/asyncDataStatus";
+import { mapActions } from "vuex";
 
-import ForumList from "@/components/ForumList.vue";
 export default {
   components: {
     ForumList,
   },
+  mixins: [asyncDataStatus],
+
   props: {
     id: {
-      type: String,
       required: true,
+      type: String,
     },
   },
   computed: {
     category() {
-      return findById(this.$store.state.categories, this.id);
+      return findById(this.$store.state.categories, this.id) || {};
     },
   },
   methods: {
+    ...mapActions(["fetchCategory", "fetchForums"]),
     getForumsForCategory(category) {
-      return this.$store.state.forums.filter((forum) => {
-        return forum.categoryId === category.id;
-      });
+      return this.$store.state.forums.filter(
+        (forum) => forum.categoryId === category.id
+      );
     },
+  },
+  async created() {
+    const category = await this.fetchCategory({ id: this.id });
+    await this.fetchForums({ ids: category.forums });
+    this.asyncDataStatus_fetched();
   },
 };
 </script>
+
+<style scoped></style>

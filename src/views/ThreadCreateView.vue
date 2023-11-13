@@ -1,5 +1,5 @@
 <template>
-  <div class="col-full push-top">
+  <div v-if="asyncDataStatus_ready" class="col-full push-top">
     <h1>
       Create new thread in <i>{{ forum.name }}</i>
     </h1>
@@ -7,17 +7,17 @@
     <ThreadEditor @save="save" @cancel="cancel" />
   </div>
 </template>
-
 <script>
-import ThreadEditor from "@/components/ThreadEditor.vue";
-import { findById } from "@/helpers/index.js";
+import ThreadEditor from "@/components/ThreadEditor";
+import { findById } from "@/helpers";
+import asyncDataStatus from "@/mixins/asyncDataStatus";
+import { mapActions } from "vuex";
+
 export default {
   components: { ThreadEditor },
+  mixins: [asyncDataStatus],
   props: {
-    forumId: {
-      type: String,
-      required: true,
-    },
+    forumId: { type: String, required: true },
   },
   computed: {
     forum() {
@@ -25,24 +25,22 @@ export default {
     },
   },
   methods: {
+    ...mapActions(["fetchForum", "createThread"]),
     async save({ title, text }) {
-      //dispatch a vuex action to save the thread
-      const thread = await this.$store.dispatch("createThread", {
+      const thread = await this.createThread({
+        forumId: this.forum.id,
         title,
         text,
-        forumId: this.forum.id,
       });
-      this.$router.push({
-        name: "ThreadShow",
-        params: { id: thread.id },
-      });
+      this.$router.push({ name: "ThreadShow", params: { id: thread.id } });
     },
     cancel() {
-      this.$router.push({
-        name: "Forum",
-        params: { id: this.forum.id },
-      });
+      this.$router.push({ name: "Forum", params: { id: this.forum.id } });
     },
+  },
+  async created() {
+    await this.fetchForum({ id: this.forumId });
+    this.asyncDataStatus_fetched();
   },
 };
 </script>

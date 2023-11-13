@@ -1,5 +1,5 @@
 <template>
-  <div class="col-large push-top">
+  <div v-if="asyncDataStatus_ready" class="col-large push-top">
     <h1>
       {{ thread.title }}
       <router-link
@@ -16,8 +16,8 @@
       </router-link>
     </h1>
     <p>
-      By <a href="#" class="link-unstyled">{{ thread.author.name }}</a
-      >, <AppDate :timestamp="thread.publishedAt" />
+      By <a href="#" class="link-unstyled">{{ thread.author?.name }}</a
+      >, <AppDate :timestamp="thread.publishedAt" />.
       <span
         style="float: right; margin-top: 2px"
         class="hide-mobile text-faded text-small"
@@ -25,28 +25,32 @@
         {{ thread.contributorsCount }} contributors</span
       >
     </p>
+
     <post-list :posts="threadPosts" />
+
     <post-editor @save="addPost" />
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import PostEditor from "@/components/PostEditor.vue";
-import PostList from "@/components/PostList.vue";
+import PostEditor from "@/components/PostEditor";
+import PostList from "@/components/PostList";
+import asyncDataStatus from "@/mixins/asyncDataStatus";
+import { mapActions } from "vuex";
 
 export default {
+  name: "ThreadShow",
   components: {
     PostList,
     PostEditor,
   },
+  mixins: [asyncDataStatus],
   props: {
     id: {
       required: true,
       type: String,
     },
   },
-
   computed: {
     threads() {
       return this.$store.state.threads;
@@ -62,13 +66,24 @@ export default {
     },
   },
   methods: {
+    ...mapActions(["fetchThread", "fetchUsers", "fetchPosts", "createPost"]),
     addPost(eventData) {
       const post = {
         ...eventData.post,
         threadId: this.id,
       };
-      this.$store.dispatch("createPost", post);
+      this.createPost(post);
     },
+  },
+  async created() {
+    // fetch the thread
+    const thread = await this.fetchThread({ id: this.id });
+    // fetch the posts
+    const posts = await this.fetchPosts({ ids: thread.posts });
+    // fetch the users associated with the posts
+    const users = posts.map((post) => post.userId).concat(thread.userId);
+    await this.fetchUsers({ ids: users });
+    this.asyncDataStatus_fetched();
   },
 };
 </script>
