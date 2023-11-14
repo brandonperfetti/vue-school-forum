@@ -8,6 +8,7 @@ import store from "./store";
 import ClickOutsideDirective from "@/plugins/ClickOutsideDirective";
 import FontAwesome from "@/plugins/FontAwesome";
 import PageScrollDirective from "@/plugins/PageScrollDirective";
+import VeeValidatePlugin from "@/plugins/VeeValidatePlugin";
 import Vue3Pagination from "@/plugins/Vue3Pagination";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
@@ -24,6 +25,7 @@ forumApp.use(FontAwesome);
 forumApp.use(ClickOutsideDirective);
 forumApp.use(PageScrollDirective);
 forumApp.use(Vue3Pagination);
+forumApp.use(VeeValidatePlugin);
 
 const requireComponent = require.context(
   "./components",
