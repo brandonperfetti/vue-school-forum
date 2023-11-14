@@ -4,6 +4,8 @@ import {
   makeAppendChildToParentMutation,
 } from "@/helpers";
 import firebase from "firebase/compat/app";
+import chunk from "lodash/chunk";
+
 export default {
   namespaced: true,
   state: {
@@ -110,6 +112,12 @@ export default {
         { resource: "threads", ids, emoji: "📄" },
         { root: true }
       ),
+    fetchThreadsByPage: ({ dispatch, commit }, { ids, page, perPage = 10 }) => {
+      commit("clearThreads");
+      const chunks = chunk(ids, perPage);
+      const limitedIds = chunks[page - 1];
+      return dispatch("fetchThreads", { ids: limitedIds });
+    },
   },
   mutations: {
     appendPostToThread: makeAppendChildToParentMutation({
@@ -120,5 +128,8 @@ export default {
       parent: "threads",
       child: "contributors",
     }),
+    clearThreads(state) {
+      state.items = [];
+    },
   },
 };
