@@ -5,7 +5,9 @@ import router from "./router";
 import store from "./store";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+import ClickOutsideDirective from "@/plugins/ClickOutsideDirective";
 import FontAwesome from "@/plugins/FontAwesome";
+import PageScrollDirective from "@/plugins/PageScrollDirective";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
@@ -18,6 +20,8 @@ const forumApp = createApp(App);
 forumApp.use(store);
 forumApp.use(router);
 forumApp.use(FontAwesome);
+forumApp.use(ClickOutsideDirective);
+forumApp.use(PageScrollDirective);
 
 const requireComponent = require.context(
   "./components",
