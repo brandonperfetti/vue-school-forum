@@ -55,17 +55,23 @@ export default {
   methods: {
     async signIn() {
       try {
-        await this.$store.dispatch("signInWithEmailAndPassword", {
+        await this.$store.dispatch("auth/signInWithEmailAndPassword", {
           ...this.form,
         });
-        this.$router.push("/");
+        this.successRedirect();
       } catch (error) {
         alert(error.message);
       }
     },
     async signInWithGoogle() {
-      await this.$store.dispatch("signInWithGoogle");
+      await this.$store.dispatch("auth/signInWithGoogle");
       this.$router.push("/");
+      this.successRedirect();
+    },
+    successRedirect() {
+      console.log("redirecting");
+      const redirectTo = this.$route.query.redirectTo || { name: "Home" };
+      this.$router.push(redirectTo);
     },
   },
   created() {

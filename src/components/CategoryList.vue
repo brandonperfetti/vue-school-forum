@@ -22,9 +22,9 @@ export default {
   },
   methods: {
     getForumsForCategory(category) {
-      return this.$store.state.forums.filter((forum) => {
-        return forum.categoryId === category.id;
-      });
+      return this.$store.state.forums.items.filter(
+        (forum) => forum.categoryId === category.id
+      );
     },
   },
 };

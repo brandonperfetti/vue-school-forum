@@ -35,7 +35,7 @@
 </template>
 
 <!-- Composition API -->
-<script setup>
+<!-- <script setup>
 import { computed, reactive } from "vue";
 
 const props = defineProps({
@@ -57,10 +57,10 @@ const existing = computed(() => {
 function save() {
   emit("save", { ...form });
 }
-</script>
+</script> -->
 
 <!-- Options API -->
-<!-- <script>
+<script>
 export default {
   props: {
     title: { type: String, default: "" },
@@ -81,8 +81,21 @@ export default {
   },
   methods: {
     save() {
+      this.$emit("clean");
       this.$emit("save", { ...this.form });
     },
   },
+  watch: {
+    form: {
+      handler() {
+        if (this.form.title !== this.title || this.form.text !== this.text) {
+          this.$emit("dirty");
+        } else {
+          this.$emit("clean");
+        }
+      },
+      deep: true,
+    },
+  },
 };
-</script> -->
+</script>

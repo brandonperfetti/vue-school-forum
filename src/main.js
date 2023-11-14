@@ -12,12 +12,6 @@ import "firebase/compat/firestore";
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-firebase.auth().onAuthStateChanged((user) => {
-  store.dispatch("unsubscribeAuthUserSnapshot");
-  if (user) {
-    store.dispatch("fetchAuthUser");
-  }
-});
 
 const forumApp = createApp(App);
 

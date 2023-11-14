@@ -51,7 +51,7 @@ export default {
   methods: {
     forumThreadsWord(forum) {
       if (forum.threads?.length) {
-        if (forum.threads.length > 1) {
+        if (forum.threads?.length > 1) {
           return "threads";
         } else {
           return "thread";
