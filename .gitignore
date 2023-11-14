@@ -2,17 +2,14 @@
 node_modules
 /dist
 
-.env
 # local env files
+.env
 .env.local
 .env.*.local
-
 # dev env files
 .env.development
-
 # production env files
 .env.production
-
 # test env files
 .env.test
 
