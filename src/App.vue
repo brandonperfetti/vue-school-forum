@@ -7,17 +7,19 @@
       :key="`${$route.path}${JSON.stringify($route.query)}`"
     />
     <AppSpinner v-show="!showPage" />
+    <AppNotifications />
   </div>
 </template>
 
 <script>
+import AppNotifications from "@/components/AppNotifications";
 import TheNavbar from "@/components/TheNavbar";
 import NProgress from "nprogress";
 import { mapActions } from "vuex";
 
 export default {
   name: "App",
-  components: { TheNavbar },
+  components: { TheNavbar, AppNotifications },
   data() {
     return {
       showPage: false,

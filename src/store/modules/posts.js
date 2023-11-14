@@ -1,4 +1,6 @@
+import { makeFetchItemAction, makeFetchItemsAction } from "@/helpers";
 import firebase from "firebase/compat/app";
+
 export default {
   namespaced: true,
   state: {
@@ -65,18 +67,8 @@ export default {
         { root: true }
       );
     },
-    fetchPost: ({ dispatch }, { id }) =>
-      dispatch(
-        "fetchItem",
-        { emoji: "💬", resource: "posts", id },
-        { root: true }
-      ),
-    fetchPosts: ({ dispatch }, { ids }) =>
-      dispatch(
-        "fetchItems",
-        { resource: "posts", ids, emoji: "💬" },
-        { root: true }
-      ),
+    fetchPost: makeFetchItemAction({ emoji: "💬", resource: "posts" }),
+    fetchPosts: makeFetchItemsAction({ emoji: "💬", resource: "posts" }),
   },
   mutations: {},
 };
