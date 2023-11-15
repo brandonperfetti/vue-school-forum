@@ -131,7 +131,7 @@ const router = createRouter({
 
 router.afterEach(() => {
   store.dispatch("clearItems", {
-    modules: ["categories", "forums", "posts", "threads"],
+    modules: ["home", "categories", "forums", "posts", "threads"],
   });
 });
 
