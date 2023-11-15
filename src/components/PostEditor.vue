@@ -3,6 +3,7 @@
     <VeeForm @submit="save" :key="formKey">
       <AppFormField
         as="textarea"
+        label="Content"
         name="text"
         v-model="postCopy.text"
         rows="10"

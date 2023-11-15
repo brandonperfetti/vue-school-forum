@@ -13,7 +13,7 @@ export default {
   },
   mounted() {
     this.observer = new IntersectionObserver(
-      (entries, observer) => {
+      (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) this.$emit("load");
         });

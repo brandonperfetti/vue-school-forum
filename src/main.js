@@ -5,12 +5,13 @@ import router from "./router";
 import store from "./store";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
+import firebase from "@/helpers/firebase";
 import ClickOutsideDirective from "@/plugins/ClickOutsideDirective";
 import FontAwesome from "@/plugins/FontAwesome";
 import PageScrollDirective from "@/plugins/PageScrollDirective";
 import VeeValidatePlugin from "@/plugins/VeeValidatePlugin";
 import Vue3Pagination from "@/plugins/Vue3Pagination";
-import firebase from "firebase/compat/app";
+import { createHead } from "@vueuse/head";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 
@@ -26,6 +27,7 @@ forumApp.use(ClickOutsideDirective);
 forumApp.use(PageScrollDirective);
 forumApp.use(Vue3Pagination);
 forumApp.use(VeeValidatePlugin);
+forumApp.use(createHead());
 
 const requireComponent = require.context(
   "./components",

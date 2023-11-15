@@ -1,6 +1,6 @@
+import firebase from "@/helpers/firebase";
 import { localize } from "@vee-validate/i18n";
 import { email, min, required, url } from "@vee-validate/rules";
-import firebase from "firebase/compat/app";
 import { ErrorMessage, Field, Form, configure, defineRule } from "vee-validate";
 
 export default (app) => {

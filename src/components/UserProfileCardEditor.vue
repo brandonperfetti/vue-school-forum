@@ -14,7 +14,7 @@
               v-else
               icon="camera"
               size="3x"
-              :style="{ color: 'white', opacity: '8' }"
+              :style="{ color: 'white', opacity: '.8' }"
             />
           </div>
           <input
@@ -26,7 +26,6 @@
           />
         </label>
       </p>
-
       <UserProfileCardEditorRandomAvatar @hit="activeUser.avatar = $event" />
 
       <AppFormField
@@ -77,9 +76,7 @@
       />
       <datalist id="locations">
         <option
-          v-for="location in locationOptions.sort((a, b) =>
-            a.name.common.localeCompare(b.name.common)
-          )"
+          v-for="location in locationOptions"
           :value="location.name.common"
           :key="location.name.common"
         />
@@ -90,27 +87,40 @@
         <button type="submit" class="btn-blue">Save</button>
       </div>
     </VeeForm>
+    <UserProfileCardEditorReauthenticate
+      v-model="needsReAuth"
+      @success="onReauthenticated"
+      @fail="onReauthenticatedFailed"
+    />
   </div>
 </template>
 
 <script>
+import useNotifications from "@/composables/useNotifications";
 import { mapActions } from "vuex";
 import UserProfileCardEditorRandomAvatar from "./UserProfileCardEditorRandomAvatar";
-
+import UserProfileCardEditorReauthenticate from "./UserProfileCardEditorReauthenticate.vue";
 export default {
-  components: { UserProfileCardEditorRandomAvatar },
-
+  components: {
+    UserProfileCardEditorRandomAvatar,
+    UserProfileCardEditorReauthenticate,
+  },
   props: {
     user: {
       type: Object,
       required: true,
     },
   },
+  setup() {
+    const { addNotification } = useNotifications();
+    return { addNotification };
+  },
   data() {
     return {
       uploadingImage: false,
       activeUser: { ...this.user },
       locationOptions: [],
+      needsReAuth: false,
     };
   },
   methods: {
@@ -139,10 +149,39 @@ export default {
         });
       }
     },
+    async onReauthenticated() {
+      await this.$store.dispatch("auth/updateEmail", {
+        email: this.activeUser.email,
+      });
+      this.saveUserData();
+    },
+    async onReauthenticatedFailed() {
+      this.addNotification({
+        message: "Error updating user",
+        type: "error",
+        timeout: 3000,
+      });
+      this.$router.push({ name: "Profile" });
+    },
+    async saveUserData() {
+      await this.$store.dispatch("users/updateUser", {
+        ...this.activeUser,
+        threads: this.activeUser.threadIds,
+      });
+      this.$router.push({ name: "Profile" });
+      this.addNotification({
+        message: "User successfully updated",
+        timeout: 3000,
+      });
+    },
     async save() {
       await this.handleRandomAvatarUpload();
-      this.$store.dispatch("users/updateUser", { ...this.activeUser });
-      this.$router.push({ name: "Profile" });
+      const emailChanged = this.activeUser.email !== this.user.email;
+      if (emailChanged) {
+        this.needsReAuth = true;
+      } else {
+        this.saveUserData();
+      }
     },
     cancel() {
       this.$router.push({ name: "Profile" });

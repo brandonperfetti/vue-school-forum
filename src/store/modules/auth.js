@@ -1,5 +1,5 @@
 import useNotifications from "@/composables/useNotifications";
-import firebase from "firebase/compat/app";
+import firebase from "@/helpers/firebase";
 import "firebase/compat/storage";
 
 export default {
@@ -15,11 +15,22 @@ export default {
     },
   },
   actions: {
+    async updateEmail({ email }) {
+      return firebase.auth().currentUser.updateEmail(email);
+    },
+    async reauthenticate({ email, password }) {
+      const credential = firebase.auth.EmailAuthProvider.credential(
+        email,
+        password
+      );
+      await firebase
+        .auth()
+        .currentUser.reauthenticateWithCredential(credential);
+    },
     initAuthentication({ dispatch, commit, state }) {
       if (state.authObserverUnsubscribe) state.authObserverUnsubscribe();
       return new Promise((resolve) => {
         const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
-          console.log("👣 the user has changed");
           dispatch("unsubscribeAuthUserSnapshot");
           if (user) {
             await dispatch("fetchAuthUser");
@@ -97,7 +108,7 @@ export default {
 
       commit("setAuthId", null);
     },
-    fetchAuthUser: async ({ dispatch, state, commit }) => {
+    fetchAuthUser: async ({ dispatch, commit }) => {
       const userId = firebase.auth().currentUser?.uid;
       if (!userId) return;
       await dispatch(

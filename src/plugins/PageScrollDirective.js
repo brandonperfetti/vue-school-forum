@@ -3,7 +3,6 @@ const PageScrollDirective = {
   mounted(el, binding) {
     el.__PageScroll__ = debounce(
       () => {
-        console.log("scrolling");
         binding.value();
       },
       200,

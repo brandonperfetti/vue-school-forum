@@ -121,7 +121,7 @@ export default {
     ...mapGetters("auth", ["authUser"]),
   },
   created() {
-    this.$router.beforeEach((to, from) => {
+    this.$router.beforeEach(() => {
       this.mobileNavMenu = false;
     });
   },

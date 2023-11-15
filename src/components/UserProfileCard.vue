@@ -29,11 +29,11 @@
         <a :href="user.website">{{ user.website }}</a>
       </p>
     </div>
-    <p class="text-xsmall text-faded text-center">
+    <!-- <p class="text-xsmall text-faded text-center">
       Member since june 2003, last visited 4 hours ago
-    </p>
+    </p> -->
     <div class="text-center">
-      <hr />
+      <!-- <hr /> -->
       <router-link :to="{ name: 'ProfileEdit' }" class="btn-green btn-small">
         Edit Profile
       </router-link>

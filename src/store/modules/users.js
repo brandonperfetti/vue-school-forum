@@ -5,8 +5,7 @@ import {
   makeFetchItemAction,
   makeFetchItemsAction,
 } from "@/helpers";
-
-import firebase from "firebase/compat/app";
+import firebase from "@/helpers/firebase";
 export default {
   namespaced: true,
   state: {
@@ -32,7 +31,7 @@ export default {
               (post) => post.userId === user.id
             );
           },
-          get theThreads() {
+          get threadIds() {
             return user.threads;
           },
           get threadsCount() {

@@ -1,13 +1,13 @@
 import { findById } from "@/helpers";
 import store from "@/store";
-import HomeView from "@/views/HomeView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
     path: "/",
     name: "Home",
-    component: HomeView,
+    component: () =>
+      import(/* webpackChunkName: "Home" */ "../views/HomeView.vue"),
   },
   {
     path: "/me",
@@ -105,7 +105,7 @@ const routes = [
   {
     path: "/logout",
     name: "SignOut",
-    async beforeEnter(to, from) {
+    async beforeEnter() {
       await store.dispatch("auth/signOut");
       return { name: "Home" };
     },
@@ -115,15 +115,6 @@ const routes = [
     name: "NotFound",
     component: () =>
       import(/* webpackChunkName: "not-found" */ "../views/NotFoundView.vue"),
-  },
-  {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
 ];
 
@@ -138,9 +129,15 @@ const router = createRouter({
   },
 });
 
-router.beforeEach(async (to, from) => {
+router.afterEach(() => {
+  store.dispatch("clearItems", {
+    modules: ["categories", "forums", "posts", "threads"],
+  });
+});
+
+router.beforeEach(async (to) => {
   await store.dispatch("auth/initAuthentication");
-  console.log(`🚦 navigating to ${to.name} from ${from.name}`);
+  // console.log(`🚦 navigating to ${to.name} from ${from.name}`);
   store.dispatch("unsubscribeAllSnapshots");
   if (to.meta.requiresAuth && !store.state.auth.authId) {
     return { name: "SignIn", query: { redirectTo: to.path } };

@@ -1,5 +1,5 @@
 import { makeFetchItemAction, makeFetchItemsAction } from "@/helpers";
-import firebase from "firebase/compat/app";
+import firebase from "@/helpers/firebase";
 export default {
   namespaced: true,
   state: {
@@ -13,7 +13,6 @@ export default {
       resource: "categories",
     }),
     fetchAllCategories({ commit }) {
-      console.log("🔥", "🏷", "all");
       return new Promise((resolve) => {
         firebase
           .firestore()

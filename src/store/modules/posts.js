@@ -1,5 +1,5 @@
 import { makeFetchItemAction, makeFetchItemsAction } from "@/helpers";
-import firebase from "firebase/compat/app";
+import firebase from "@/helpers/firebase";
 
 export default {
   namespaced: true,
@@ -8,9 +8,10 @@ export default {
   },
   getters: {},
   actions: {
-    async createPost({ commit, state, rootState }, post) {
+    async createPost({ commit, rootState }, post) {
       post.userId = rootState.auth.authId;
       post.publishedAt = firebase.firestore.FieldValue.serverTimestamp();
+      post.firstInThread = post.firstInThread || false;
       const batch = firebase.firestore().batch();
       const postRef = firebase.firestore().collection("posts").doc();
       const threadRef = firebase
@@ -22,12 +23,14 @@ export default {
         .collection("users")
         .doc(rootState.auth.authId);
       batch.set(postRef, post);
-      batch.update(threadRef, {
+      const threadUpdates = {
         posts: firebase.firestore.FieldValue.arrayUnion(postRef.id),
-        contributors: firebase.firestore.FieldValue.arrayUnion(
+      };
+      if (!post.firstInThread)
+        threadUpdates.contributors = firebase.firestore.FieldValue.arrayUnion(
           rootState.auth.authId
-        ),
-      });
+        );
+      batch.update(threadRef, threadUpdates);
       batch.update(userRef, {
         postsCount: firebase.firestore.FieldValue.increment(1),
       });
@@ -43,13 +46,15 @@ export default {
         { childId: newPost.id, parentId: post.threadId },
         { root: true }
       ); // append post to thread
-      commit(
-        "threads/appendContributorToThread",
-        { childId: rootState.auth.authId, parentId: post.threadId },
-        { root: true }
-      );
+      if (!post.firstInThread) {
+        commit(
+          "threads/appendContributorToThread",
+          { childId: rootState.auth.authId, parentId: post.threadId },
+          { root: true }
+        );
+      }
     },
-    async updatePost({ commit, state, rootState }, { text, id }) {
+    async updatePost({ commit, rootState }, { text, id }) {
       const post = {
         text,
         edited: {
